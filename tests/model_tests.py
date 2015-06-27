@@ -19,6 +19,7 @@ class TestModels(OgormTest):
         class TestModel2(TestModel1):
             pass
         
+        self.assertTrue(isinstance(TestModel2(), TestModel1))
         self.assertTrue(isinstance(TestModel2(), Model))
         
     def test_field_accessor(self):
@@ -40,3 +41,13 @@ class TestModels(OgormTest):
         self.assertEqual(m2.foo,'barbar')
         self.assertEqual(m2._fields['foo'].value,'barbar')
         
+        # make sure normal accessors still work
+        
+        m.normal = 123
+        m2.normal = 456
+        
+        self.assertEqual(m.normal, 123)
+        self.assertEqual(m2.normal, 456)
+    
+        self.assertFalse('normal' in m._fields)
+        self.assertFalse('normal' in m2._fields)
