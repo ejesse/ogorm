@@ -44,7 +44,14 @@ class Model(metaclass=ModelBase):
     
     def __init__(self, *args, **kwargs):
         self._fields = {}
+        self._instantiate_fields()
+            
+    def _instantiate_fields(self):
+        # read through the fields in the class variable
+        # and assign new instances to their attribute names
         for k in self._field_defs.keys():
+            # we'll need a way to bypass our get/set fancy/schmancy
+            # so put copies of the fields in _fields
             self._fields[k] = self._field_defs[k].__class__.__call__()
             super(Model, self).__setattr__(k, self._fields[k])
             
@@ -63,6 +70,3 @@ class Model(metaclass=ModelBase):
                 super(Model, self).__setattr__(name, value)
         except AttributeError:
             super(Model, self).__setattr__(name, value)
-        
-
-
