@@ -1,7 +1,17 @@
 import datetime
 
+
 from models.exceptions import ValidationError
 
+
+def to_java_case(string_to_convert):
+    
+    #stripped = ''.join(ch for ch in string_to_convert if ch.isalnum())
+    components = string_to_convert.lower().split('_')
+    # We capitalize the first letter of each component except the first one
+    # with the 'title' method and join them together.
+    return components[0] + "".join(x.title() for x in components[1:])
+    
 
 class Field:
 
@@ -24,9 +34,13 @@ class Field:
         if default is not None:
             self.value = default
         self._set_python_type()
+        self._set_orientdb_type()
             
     def _set_python_type(self):
         self.python_type = None
+        
+    def _set_orientdb_type(self):
+        self.orientdb_type = None
     
     def _validate_not_null(self):
         if self.not_null:
@@ -63,6 +77,9 @@ class IntegerField(Field):
     
     def _set_python_type(self):
         self.python_type = int
+        
+    def _set_orientdb_type(self):
+        self.orientdb_type = 'integer'
     
 
 class FloatField(Field):
@@ -70,11 +87,17 @@ class FloatField(Field):
     def _set_python_type(self):
         self.python_type = float
 
+    def _set_orientdb_type(self):
+        self.orientdb_type = 'float'
+
 
 class StringField(Field):
     
     def _set_python_type(self):
         self.python_type = str
+
+    def _set_orientdb_type(self):
+        self.orientdb_type = 'string'
 
 
 class DateTimeField(Field):
@@ -82,8 +105,14 @@ class DateTimeField(Field):
     def _set_python_type(self):
         self.python_type = datetime.datetime
 
+    def _set_orientdb_type(self):
+        self.orientdb_type = 'datetime'
+
 
 class BinaryField(Field):
     
     def _set_python_type(self):
         self.python_type = bytes
+
+    def _set_orientdb_type(self):
+        self.orientdb_type = 'binary'

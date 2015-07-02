@@ -3,7 +3,7 @@ import random
 
 from models.exceptions import ValidationError
 from models.fields import Field, IntegerField, FloatField, StringField, \
-    DateTimeField, BinaryField
+    DateTimeField, BinaryField, to_java_case
 from tests import OgormTest
 
 
@@ -30,6 +30,10 @@ class TestBasicFields(OgormTest):
         
         field = Field(default=10)
         self.assertEqual(field.value, 10)
+        
+    def test_to_java_case(self):
+        
+        self.assertEqual(to_java_case("COnvert_this_to_java_case"), "convertThisToJavaCase")
         
 
 class TestIntegerField(OgormTest):
