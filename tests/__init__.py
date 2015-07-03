@@ -42,7 +42,13 @@ class OgormTest(unittest.TestCase):
         
     def setUp(self):
         self.logger = logging.getLogger(get_logger_for_name(__name__))
-        handler = logging.StreamHandler()
-        handler.setLevel(logging.DEBUG)
-        self.logger.addHandler(handler)
+        # everything after this line is embarrassing
+        add_handler = True
+        for h in self.logger.handlers:
+            if isinstance(h, logging.StreamHandler):
+                add_handler = False
+        if add_handler:
+            handler = logging.StreamHandler()
+            handler.setLevel(logging.DEBUG)
+            self.logger.addHandler(handler)
     
