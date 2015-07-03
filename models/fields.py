@@ -35,12 +35,16 @@ class Field:
             self.value = default
         self._set_python_type()
         self._set_orientdb_type()
+        self._set_orientdb_type_id()
             
     def _set_python_type(self):
         self.python_type = None
         
     def _set_orientdb_type(self):
         self.orientdb_type = None
+        
+    def _set_orientdb_type_id(self):
+        self.orientdb_type_id = None
     
     def _validate_not_null(self):
         if self.not_null:
@@ -80,6 +84,9 @@ class IntegerField(Field):
         
     def _set_orientdb_type(self):
         self.orientdb_type = 'integer'
+        
+    def _set_orientdb_type_id(self):
+        self.orientdb_type_id = 1
     
 
 class FloatField(Field):
@@ -89,6 +96,9 @@ class FloatField(Field):
 
     def _set_orientdb_type(self):
         self.orientdb_type = 'float'
+        
+    def _set_orientdb_type_id(self):
+        self.orientdb_type_id = 4
 
 
 class StringField(Field):
@@ -98,6 +108,9 @@ class StringField(Field):
 
     def _set_orientdb_type(self):
         self.orientdb_type = 'string'
+        
+    def _set_orientdb_type_id(self):
+        self.orientdb_type_id = 7
 
 
 class DateTimeField(Field):
@@ -107,6 +120,9 @@ class DateTimeField(Field):
 
     def _set_orientdb_type(self):
         self.orientdb_type = 'datetime'
+        
+    def _set_orientdb_type_id(self):
+        self.orientdb_type_id = 6
 
 
 class BinaryField(Field):
@@ -116,3 +132,6 @@ class BinaryField(Field):
 
     def _set_orientdb_type(self):
         self.orientdb_type = 'binary'
+        
+    def _set_orientdb_type_id(self):
+        self.orientdb_type_id = 8
