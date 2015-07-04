@@ -21,13 +21,17 @@ class TestModels(OgormTest):
         class Foo(models.Model):
             pass
         
+        r = self.client.command("select expand(classes) from metadata:schema")
+        self.assertFalse(any(x.name == Foo.__name__ for x in r))
+        
         create_class(Foo, client=self.client)
         
         r = self.client.command("select expand(classes) from metadata:schema")
         
         # we are making sure that the class is defined in Orient
         # by looping through all the defined classes and looking
-        # for Foo
+        # for Foo, note that Foo doesn't have any attributes
+        # or properties to check, we just need to know its there
         self.assertTrue(any(x.name == Foo.__name__ for x in r))
             
     def test_create_class_with_attribues(self):
@@ -46,6 +50,8 @@ class TestModels(OgormTest):
         # correct types and names
         r = self.client.command("select expand(properties) from ( select expand(classes) from metadata:schema) where name = '%s'" % ClassWithAttributes.__name__)
         cwa = ClassWithAttributes()
+        # loop through the fields and make sure they are defined
+        # the way we expect in OrientDB
         for f in cwa._fields.keys():
             self.assertTrue(any(x.type == cwa._fields[f].orientdb_type_id for x in r))
             self.assertTrue(any(x.name == to_java_case(f) for x in r))
