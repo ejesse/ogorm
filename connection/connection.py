@@ -9,7 +9,7 @@ def get_connection(orientdb_settings=
     client = pyorient.OrientDB(orientdb_settings['host'], 
                                orientdb_settings['port'])
     client.connect(orientdb_settings['username'], orientdb_settings['password'])
-    if not client.db_exists():
+    if not client.db_exists(orientdb_settings['db_name']):
         client.db_create(orientdb_settings['db_name'], 
                          orientdb_settings['db_type'], 
                          orientdb_settings['db_storage'])
