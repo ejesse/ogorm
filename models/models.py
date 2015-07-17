@@ -93,9 +93,6 @@ class Model(metaclass=ModelBase):
     def rid(self, rid):
         self._set_rid(rid)
         
-        
-    
-            
     def __getattribute__(self, name):
         val = super(Model, self).__getattribute__(name)
         if isinstance(val, Field):
