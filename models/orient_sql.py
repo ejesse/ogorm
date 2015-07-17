@@ -1,7 +1,6 @@
 import logging
 
 from connection.connection import get_connection
-from models.fields import to_java_case
 from utils import get_logger_for_name
 
 
@@ -27,7 +26,8 @@ def create_class(klass, extends=None, client=None):
     client.command(create_str)
     
     for k in instance._fields:
-        field_str = 'CREATE PROPERTY %s.%s %s' % (class_name, to_java_case(k), 
-                                              instance._fields[k].orientdb_type)
+        field_str = 'CREATE PROPERTY %s.%s %s' % (class_name, 
+                                      instance._py_to_orient_field_mapping[k], 
+                                      instance._fields[k].orientdb_type)
         LOGGER.debug("applying property with command %s" % (field_str))
         client.command(field_str)

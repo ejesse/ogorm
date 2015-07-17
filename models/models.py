@@ -1,6 +1,4 @@
-from abc import ABCMeta
-
-from models.fields import Field
+from models.fields import Field, to_java_case
 
 
 class ModelBase(type):
@@ -44,6 +42,7 @@ class Model(metaclass=ModelBase):
     
     def __init__(self, *args, **kwargs):
         self._fields = {}
+        self._py_to_orient_field_mapping = {}
         self._instantiate_fields()
             
     def _instantiate_fields(self):
@@ -54,6 +53,11 @@ class Model(metaclass=ModelBase):
             # so put copies of the fields in _fields
             self._fields[k] = self._field_defs[k].__class__.__call__()
             super(Model, self).__setattr__(k, self._fields[k])
+            # setup the field mapping
+            self._py_to_orient_field_mapping[k] = to_java_case(k)
+            # in both directions
+            # note: it works fine if they are the same!
+            self._py_to_orient_field_mapping[to_java_case(k)] = k 
             
     def __getattribute__(self, name):
         val = super(Model, self).__getattribute__(name)
