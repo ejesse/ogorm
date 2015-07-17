@@ -1,7 +1,7 @@
 from models import models
 from models.fields import IntegerField, FloatField, StringField, \
     DateTimeField, BinaryField, to_java_case
-from models.orient_sql import create_class
+from models.orient_sql import create_class, insert
 from tests import OgormTest
 
 
@@ -12,6 +12,12 @@ class ClassWithAttributes(models.Model):
     float_field = FloatField()
     datetime_field = DateTimeField()
     bin_field = BinaryField()
+    
+
+class ClassToInsert(models.Model):
+            
+    str_field = StringField()
+    int_field = IntegerField()
 
 
 class TestModels(OgormTest):
@@ -53,5 +59,23 @@ class TestModels(OgormTest):
         for f in cwa._fields.keys():
             self.assertTrue(any(x.type == cwa._fields[f].orientdb_type_id for x in r))
             self.assertTrue(any(x.name == to_java_case(f) for x in r))
+            
+            
+    def test_insert(self):
+        
+        create_class(ClassToInsert, client=self.client)
+        
+        class_to_insert = ClassToInsert()
+        class_to_insert.int_field = 10
+        class_to_insert.str_field = 'foobar'
+        insert(class_to_insert, client=self.client)
+        self.assertIsNotNone(class_to_insert.rid)
+        print("RID IS %s" % (class_to_insert.rid))
+        r = self.client.record_load(class_to_insert.rid)
+        self.assertEqual(r._rid, class_to_insert.rid)
+        self.assertEqual(r.oRecordData[class_to_insert._py_to_orient_field_mapping['str_field']], 
+                         class_to_insert.str_field)
+        self.assertEqual(r.oRecordData[class_to_insert._py_to_orient_field_mapping['int_field']], 
+                         class_to_insert.int_field)
         
 
