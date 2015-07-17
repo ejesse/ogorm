@@ -1,18 +1,24 @@
-import logging
-
 from models import models
-from models.fields import Field, IntegerField, FloatField, StringField, \
+from models.fields import IntegerField, FloatField, StringField, \
     DateTimeField, BinaryField, to_java_case
 from models.orient_sql import create_class
 from tests import OgormTest
-from utils import get_logger_for_name
+
+
+class ClassWithAttributes(models.Model):
+            
+    str_field = StringField()
+    int_field = IntegerField()
+    float_field = FloatField()
+    datetime_field = DateTimeField()
+    bin_field = BinaryField()
 
 
 class TestModels(OgormTest):
     
     def test_basic_class_creation(self):
         
-        cluster_id = self.client.command( "create class my_class extends V" )
+        self.client.command( "create class my_class extends V" )
         r = self.client.command("insert into my_class ( 'accommodation', 'work', 'holiday' ) values( 'B&B', 'garage', 'mountain' )")
         self.assertEqual(r[0]._OrientRecord__rid, self.client.record_load(r[0]._OrientRecord__rid)._OrientRecord__rid)
         
@@ -36,14 +42,6 @@ class TestModels(OgormTest):
             
     def test_create_class_with_attribues(self):
         
-        class ClassWithAttributes(models.Model):
-            
-            str_field = StringField()
-            int_field = IntegerField()
-            float_field = FloatField()
-            datetime_field = DateTimeField()
-            bin_field = BinaryField()
-            
         create_class(ClassWithAttributes, client=self.client)
         
         # we will get the properties and make sure they are

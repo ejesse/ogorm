@@ -5,7 +5,7 @@ from models.fields import to_java_case
 from utils import get_logger_for_name
 
 
-logger = logging.getLogger(get_logger_for_name(__name__))
+LOGGER = logging.getLogger(get_logger_for_name(__name__))
 
 
 def create_class(klass, extends=None, client=None):
@@ -20,13 +20,14 @@ def create_class(klass, extends=None, client=None):
     if extends is not None:
         create_str  =  '%s EXTENDS %s' % (create_str, extends)
     
-    c = klass()
+    instance = klass()
         
-    logger.debug("creating class with command %s" % create_str)
+    LOGGER.debug("creating class with command %s" % create_str)
 
     client.command(create_str)
     
-    for k in c._fields:
-        field_str = 'CREATE PROPERTY %s.%s %s' % (class_name, to_java_case(k), c._fields[k].orientdb_type)
-        logger.debug("applying property with command %s" % (field_str))
+    for k in instance._fields:
+        field_str = 'CREATE PROPERTY %s.%s %s' % (class_name, to_java_case(k), 
+                                              instance._fields[k].orientdb_type)
+        LOGGER.debug("applying property with command %s" % (field_str))
         client.command(field_str)

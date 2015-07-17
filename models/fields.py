@@ -1,6 +1,4 @@
 import datetime
-
-
 from models.exceptions import ValidationError
 
 
@@ -49,17 +47,22 @@ class Field:
     def _validate_not_null(self):
         if self.not_null:
             if self.value is None:
-                raise ValidationError("Value is None, but self.not_null is True")
+                raise ValidationError(
+                      "Value is None, but self.not_null is True")
     
     def _validate_minimum_value(self):
         if self.minimum_value is not None:
             if self.value < self.minimum_value:
-                raise ValidationError("Value %s is less than minimum value %s" % (self.value, self.minimum_value))
+                raise ValidationError(
+                  "Value %s is less than minimum value %s" % (self.value, 
+                                                          self.minimum_value))
             
     def _validate_maximum_value(self):
         if self.maximum_value is not None:
             if self.value > self.maximum_value:
-                raise ValidationError("Value %s is greater than maximum value %s" % (self.value, self.maximum_value))
+                raise ValidationError(
+                  "Value %s is greater than maximum value %s" % (self.value, 
+                                                         self.maximum_value))
     
     def validate(self):
         pass
@@ -67,7 +70,9 @@ class Field:
     def _type_validation(self):
         if self.value is not None:
             if not isinstance(self.value, self.python_type):
-                raise ValidationError("%s is not a valid value for %s" % (self.value, self.__class__.__name__))
+                raise ValidationError(
+                  "%s is not a valid value for %s" % (self.value, 
+                                                      self.__class__.__name__))
     
     def _basic_validation(self):
         self._validate_not_null()
