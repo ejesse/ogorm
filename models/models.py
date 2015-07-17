@@ -43,6 +43,7 @@ class Model(metaclass=ModelBase):
     def __init__(self, *args, **kwargs):
         self._fields = {}
         self._py_to_orient_field_mapping = {}
+        self._rid = None
         self._instantiate_fields()
             
     def _instantiate_fields(self):
@@ -58,6 +59,42 @@ class Model(metaclass=ModelBase):
             # in both directions
             # note: it works fine if they are the same!
             self._py_to_orient_field_mapping[to_java_case(k)] = k 
+
+    @property
+    def cluster_id(self):
+        if self._rid is None:
+            return None
+        return int(self._rid.split(':')[0].replace('#',''))
+    
+    @property
+    def cluster_position(self):
+        if self._rid is None:
+            return None
+        return int(self._rid.split(':')[1])
+    
+    @property
+    def rid(self):
+        return self._rid
+    
+    def _set_rid(self, rid):
+        # temporarily remove the '#' if it is there
+        if rid[0] == '#':
+            rid = rid.replace('#', '')
+        # let it raise ValueError if the parts of the
+        # rid aren't castable to int
+        int(rid.split(':')[0])
+        int(rid.split(':')[1])
+        
+        # everything seems ok, put the '#' back
+        # and set the variable
+        self._rid = '%s%s' % ('#', rid)
+    
+    @rid.setter
+    def rid(self, rid):
+        self._set_rid(rid)
+        
+        
+    
             
     def __getattribute__(self, name):
         val = super(Model, self).__getattribute__(name)
