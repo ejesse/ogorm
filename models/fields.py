@@ -4,7 +4,6 @@ from models.exceptions import ValidationError
 
 def to_java_case(string_to_convert):
     
-    #stripped = ''.join(ch for ch in string_to_convert if ch.isalnum())
     components = string_to_convert.lower().split('_')
     # We capitalize the first letter of each component except the first one
     # with the 'title' method and join them together.
