@@ -2,6 +2,7 @@ import json
 import logging
 
 from connection.connection import get_connection
+from models.models import get_orient_valid_class_name
 from utils import get_logger_for_name
 
 
@@ -13,7 +14,7 @@ def create_class(klass, extends=None, client=None):
     if client is None:
         client = get_connection()
     
-    class_name = klass.__name__
+    class_name = get_orient_valid_class_name(klass)
     
     create_str = 'CREATE CLASS %s' % class_name
     
@@ -39,7 +40,7 @@ def insert(obj, client=None):
     if client is None:
         client = get_connection()
         
-    class_name = obj.__class__.__name__
+    class_name = get_orient_valid_class_name(obj)
     
     insert_str = "INSERT INTO %s" % class_name
     
@@ -54,4 +55,11 @@ def insert(obj, client=None):
     rec = resp[0]
     obj.rid = rec._rid
     return rec
+
+def load(rid, client=None):
+    
+    if client is None:
+        client = get_connection()
+        
+    return client.record_load(rid)
     

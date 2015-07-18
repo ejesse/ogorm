@@ -1,4 +1,39 @@
+import importlib
+
 from models.fields import Field, to_java_case
+
+
+def get_full_class_path_name(obj):
+    if hasattr(obj,'__call__'):
+        obj = obj()
+    return obj.__module__ + "." + obj.__class__.__name__
+
+
+def get_orient_valid_class_name(obj):
+    name = get_full_class_path_name(obj)
+    return name.replace(".", "___dot___")
+
+
+def get_module_class_name_from_orient_class_name(orient_class):
+    pythonized = orient_class.replace("___dot___", ".")
+    parts = pythonized.split(".")
+    class_name = parts.pop()
+    module_name = '.'.join(parts)
+    return module_name, class_name
+
+
+def class_for_name(module_name, class_name):
+    # load the module, will raise ImportError if module cannot be loaded
+    m = importlib.import_module(module_name)
+    # get the class, will raise AttributeError if class cannot be found
+    c = getattr(m, class_name)
+    return c
+
+
+def get_class_from_orient_class_name(orient_class):
+    # wraps up other functions into one
+    module_name, class_name = get_module_class_name_from_orient_class_name(orient_class)
+    return class_for_name(module_name, class_name)
 
 
 class ModelBase(type):
@@ -108,3 +143,17 @@ class Model(metaclass=ModelBase):
                 super(Model, self).__setattr__(name, value)
         except AttributeError:
             super(Model, self).__setattr__(name, value)
+    
+    @classmethod
+    def from_orient(self, orient_record):
+        # orient driver returns an instance of
+        # pyorient.types.OrientRecord
+        # which in turn stores its data in
+        # property oRecordData
+        # and other attributes in private variables
+        orient_class = orient_record._OrientRecord__o_class
+        object_to_return = get_class_from_orient_class_name(orient_class)()
+        object_to_return.rid = orient_record._rid
+        for k in orient_record.oRecordData.keys():
+            object_to_return._fields[object_to_return._py_to_orient_field_mapping[k]].value = orient_record.oRecordData[k]
+        return object_to_return

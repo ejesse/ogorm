@@ -1,7 +1,8 @@
 from models import models
 from models.fields import IntegerField, FloatField, StringField, \
     DateTimeField, BinaryField, to_java_case
-from models.orient_sql import create_class, insert
+from models.models import get_orient_valid_class_name
+from models.orient_sql import create_class, insert, load
 from tests import OgormTest
 
 
@@ -20,6 +21,16 @@ class ClassToInsert(models.Model):
     int_field = IntegerField()
 
 
+class ClassToLoad(models.Model):
+            
+    str_field = StringField()
+    int_field = IntegerField()
+
+
+class Foo(models.Model):
+    pass
+
+
 class TestModels(OgormTest):
     
     def test_basic_class_creation(self):
@@ -30,11 +41,8 @@ class TestModels(OgormTest):
         
     def test_create_class(self):
         
-        class Foo(models.Model):
-            pass
-        
         r = self.client.command("select expand(classes) from metadata:schema")
-        self.assertFalse(any(x.name == Foo.__name__ for x in r))
+        self.assertFalse(any(x.name == get_orient_valid_class_name(Foo) for x in r))
         
         create_class(Foo, client=self.client)
         
@@ -44,7 +52,7 @@ class TestModels(OgormTest):
         # by looping through all the defined classes and looking
         # for Foo, note that Foo doesn't have any attributes
         # or properties to check, we just need to know its there
-        self.assertTrue(any(x.name == Foo.__name__ for x in r))
+        self.assertTrue(any(x.name == get_orient_valid_class_name(Foo) for x in r))
             
     def test_create_class_with_attribues(self):
         
@@ -52,7 +60,7 @@ class TestModels(OgormTest):
         
         # we will get the properties and make sure they are
         # correct types and names
-        r = self.client.command("select expand(properties) from ( select expand(classes) from metadata:schema) where name = '%s'" % ClassWithAttributes.__name__)
+        r = self.client.command("select expand(properties) from ( select expand(classes) from metadata:schema) where name = '%s'" % get_orient_valid_class_name(ClassWithAttributes))
         cwa = ClassWithAttributes()
         # loop through the fields and make sure they are defined
         # the way we expect in OrientDB
@@ -70,7 +78,6 @@ class TestModels(OgormTest):
         class_to_insert.str_field = 'foobar'
         insert(class_to_insert, client=self.client)
         self.assertIsNotNone(class_to_insert.rid)
-        print("RID IS %s" % (class_to_insert.rid))
         r = self.client.record_load(class_to_insert.rid)
         self.assertEqual(r._rid, class_to_insert.rid)
         self.assertEqual(r.oRecordData[class_to_insert._py_to_orient_field_mapping['str_field']], 
@@ -78,4 +85,18 @@ class TestModels(OgormTest):
         self.assertEqual(r.oRecordData[class_to_insert._py_to_orient_field_mapping['int_field']], 
                          class_to_insert.int_field)
         
-
+    def test_load_record(self):
+        
+        create_class(ClassToLoad, client=self.client)
+        
+        class_to_insert = ClassToLoad()
+        class_to_insert.int_field = 10
+        class_to_insert.str_field = 'foobar'
+        insert(class_to_insert, client=self.client)
+        self.assertIsNotNone(class_to_insert.rid)
+        r = load(class_to_insert.rid, client=self.client)
+        self.assertEqual(r._rid, class_to_insert.rid)
+        self.assertEqual(r.oRecordData[class_to_insert._py_to_orient_field_mapping['str_field']], 
+                         class_to_insert.str_field)
+        self.assertEqual(r.oRecordData[class_to_insert._py_to_orient_field_mapping['int_field']], 
+                         class_to_insert.int_field)
