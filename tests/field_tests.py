@@ -1,5 +1,6 @@
-import datetime
 import random
+
+from arrow.arrow import Arrow
 
 from models.exceptions import ValidationError
 from models.fields import Field, IntegerField, FloatField, StringField, \
@@ -76,7 +77,7 @@ class TestDateTimeField(OgormTest):
         field = DateTimeField()
         field.value = 'f'
         self.assertRaises(ValidationError, field._type_validation)
-        field.value = datetime.datetime.now()
+        field.value = Arrow.utcnow()
         field._type_validation()
 
 
