@@ -68,7 +68,6 @@ class TestModels(OgormTest):
             self.assertTrue(any(x.type == cwa._fields[f].orientdb_type_id for x in r))
             self.assertTrue(any(x.name == to_java_case(f) for x in r))
             
-            
     def test_insert(self):
         
         create_class(ClassToInsert, client=self.client)
