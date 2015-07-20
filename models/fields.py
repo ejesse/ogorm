@@ -1,3 +1,5 @@
+import base64
+
 from arrow.arrow import Arrow
 
 from models.exceptions import ValidationError
@@ -152,6 +154,7 @@ class DateTimeField(Field):
             # first make sure it's UTC
             ovalue = self.value.to('utc')
             return ovalue.timestamp
+        return None
         
     def orient_to_python(self, value):
         # we get back a float from orient
@@ -170,3 +173,10 @@ class BinaryField(Field):
         
     def _set_orientdb_type_id(self):
         self.orientdb_type_id = 8
+        
+    def orient_value(self):
+        #we're saving via json, so let's base64 it
+        if self.value is not None:
+            return base64.b64encode(self.value).decode()
+        return None
+        

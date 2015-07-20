@@ -1,3 +1,5 @@
+import base64
+
 from arrow.arrow import Arrow
 
 from models import models
@@ -22,6 +24,8 @@ class ClassToInsert(models.Model):
     str_field = StringField()
     int_field = IntegerField()
     datetime_field = DateTimeField()
+    float_field = FloatField()
+    bin_field = BinaryField()
 
 
 class ClassToLoad(models.Model):
@@ -29,6 +33,8 @@ class ClassToLoad(models.Model):
     str_field = StringField()
     int_field = IntegerField()
     datetime_field = DateTimeField()
+    float_field = FloatField()
+    bin_field = BinaryField()
 
 
 class Foo(models.Model):
@@ -80,6 +86,8 @@ class TestModels(OgormTest):
         class_to_insert.int_field = 10
         class_to_insert.str_field = 'foobar'
         class_to_insert.datetime_field = Arrow.utcnow()
+        class_to_insert.float_field = 12345.547
+        class_to_insert.bin_field = bytes('foo','utf-8')
         insert(class_to_insert, client=self.client)
         self.assertIsNotNone(class_to_insert.rid)
         r = self.client.record_load(class_to_insert.rid)
@@ -90,6 +98,10 @@ class TestModels(OgormTest):
                          class_to_insert.int_field)
         self.assertEqual(r.oRecordData[class_to_insert._py_to_orient_field_mapping['datetime_field']], 
                          class_to_insert.datetime_field.timestamp)
+        self.assertEqual(r.oRecordData[class_to_insert._py_to_orient_field_mapping['float_field']], 
+                         class_to_insert.float_field)
+        self.assertEqual(base64.b64decode(r.oRecordData[class_to_insert._py_to_orient_field_mapping['bin_field']].encode()), 
+                         class_to_insert.bin_field)
         
     def test_load_record(self):
         
@@ -99,6 +111,8 @@ class TestModels(OgormTest):
         class_to_insert.int_field = 10
         class_to_insert.str_field = 'foobar'
         class_to_insert.datetime_field = Arrow.utcnow()
+        class_to_insert.float_field = 12345.547
+        class_to_insert.bin_field = bytes('foo','utf-8')
         insert(class_to_insert, client=self.client)
         self.assertIsNotNone(class_to_insert.rid)
         r = load(class_to_insert.rid, client=self.client)
@@ -109,3 +123,7 @@ class TestModels(OgormTest):
                          class_to_insert.int_field)
         self.assertEqual(r.oRecordData[class_to_insert._py_to_orient_field_mapping['datetime_field']], 
                          class_to_insert.datetime_field.timestamp)
+        self.assertEqual(r.oRecordData[class_to_insert._py_to_orient_field_mapping['float_field']], 
+                         class_to_insert.float_field)
+        self.assertEqual(base64.b64decode(r.oRecordData[class_to_insert._py_to_orient_field_mapping['bin_field']].encode()), 
+                         class_to_insert.bin_field)
