@@ -1,5 +1,6 @@
 import base64
 
+import arrow
 from arrow.arrow import Arrow
 
 from models.exceptions import ValidationError
@@ -36,6 +37,9 @@ class Field:
         self._set_python_type()
         self._set_orientdb_type()
         self._set_orientdb_type_id()
+        
+    def clean_value(self, value):
+        return value
         
     def orient_value(self):
         return self.value
@@ -159,9 +163,13 @@ class DateTimeField(Field):
     def orient_to_python(self, value):
         # we get back a float from orient
         # convert it to a utc Arrow time object
-        pvalue = Arrow.get(value)
-        value = pvalue.to('utc')
-
+        pvalue = arrow.get(value)
+        self.value = pvalue.to('utc')
+    
+    def clean_value(self, value):
+        if value is not None:
+            return arrow.get(value.format('YYYY-MM-DD HH:mm:ssZ'))
+    
 
 class BinaryField(Field):
     
@@ -179,4 +187,9 @@ class BinaryField(Field):
         if self.value is not None:
             return base64.b64encode(self.value).decode()
         return None
+    
+    def orient_to_python(self, value):
+        # UN base64 it
+        if value is not None:
+            self.value = base64.b64decode(value.encode())
         

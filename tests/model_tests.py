@@ -1,5 +1,7 @@
 import logging
 
+from arrow.arrow import Arrow
+
 from models.fields import StringField
 from models.models import Model, get_full_class_path_name, \
     get_orient_valid_class_name, get_module_class_name_from_orient_class_name, \
@@ -118,6 +120,9 @@ class TestModels(OgormTest):
         class_to_insert = ClassToInsert()
         class_to_insert.int_field = 10
         class_to_insert.str_field = 'foobar'
+        class_to_insert.datetime_field = Arrow.utcnow()
+        class_to_insert.float_field = 12345.547
+        class_to_insert.bin_field = bytes('foo','utf-8')
         insert(class_to_insert, client=self.client)
         r = load(class_to_insert.rid, client=self.client)
         result = Model.from_orient(r)
@@ -125,3 +130,6 @@ class TestModels(OgormTest):
         self.assertEqual(result.rid, class_to_insert.rid)
         self.assertEqual(result.str_field, class_to_insert.str_field)
         self.assertEqual(result.int_field, class_to_insert.int_field)
+        self.assertEqual(result.datetime_field, class_to_insert.datetime_field)
+        self.assertEqual(result.float_field, class_to_insert.float_field)
+        self.assertEqual(result.bin_field, class_to_insert.bin_field)

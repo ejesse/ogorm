@@ -138,7 +138,7 @@ class Model(metaclass=ModelBase):
         try:
             attr = super(Model, self).__getattribute__(name)
             if isinstance(attr, Field):
-                attr.value = value
+                attr.value = attr.clean_value(value)
             else:
                 super(Model, self).__setattr__(name, value)
         except AttributeError:
@@ -156,5 +156,5 @@ class Model(metaclass=ModelBase):
         object_to_return = get_class_from_orient_class_name(orient_class)()
         object_to_return.rid = orient_record._rid
         for k in orient_record.oRecordData.keys():
-            object_to_return._fields[object_to_return._py_to_orient_field_mapping[k]].value = orient_record.oRecordData[k]
+            object_to_return._fields[object_to_return._py_to_orient_field_mapping[k]].orient_to_python(orient_record.oRecordData[k])
         return object_to_return
