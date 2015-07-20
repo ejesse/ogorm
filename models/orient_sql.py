@@ -47,7 +47,7 @@ def insert(obj, client=None):
     values = {}
     
     for k in obj._fields.keys():
-        values[obj._py_to_orient_field_mapping[k]] = obj._fields[k].value
+        values[obj._py_to_orient_field_mapping[k]] = obj._fields[k].orient_value()
 
              
     insert_str = "%s CONTENT %s" % (insert_str, json.dumps(values))

@@ -1,3 +1,5 @@
+from arrow.arrow import Arrow
+
 from models import models
 from models.fields import IntegerField, FloatField, StringField, \
     DateTimeField, BinaryField, to_java_case
@@ -19,12 +21,14 @@ class ClassToInsert(models.Model):
             
     str_field = StringField()
     int_field = IntegerField()
+    datetime_field = DateTimeField()
 
 
 class ClassToLoad(models.Model):
             
     str_field = StringField()
     int_field = IntegerField()
+    datetime_field = DateTimeField()
 
 
 class Foo(models.Model):
@@ -68,7 +72,6 @@ class TestModels(OgormTest):
             self.assertTrue(any(x.type == cwa._fields[f].orientdb_type_id for x in r))
             self.assertTrue(any(x.name == to_java_case(f) for x in r))
             
-            
     def test_insert(self):
         
         create_class(ClassToInsert, client=self.client)
@@ -76,6 +79,7 @@ class TestModels(OgormTest):
         class_to_insert = ClassToInsert()
         class_to_insert.int_field = 10
         class_to_insert.str_field = 'foobar'
+        class_to_insert.datetime_field = Arrow.utcnow()
         insert(class_to_insert, client=self.client)
         self.assertIsNotNone(class_to_insert.rid)
         r = self.client.record_load(class_to_insert.rid)
@@ -84,6 +88,8 @@ class TestModels(OgormTest):
                          class_to_insert.str_field)
         self.assertEqual(r.oRecordData[class_to_insert._py_to_orient_field_mapping['int_field']], 
                          class_to_insert.int_field)
+        self.assertEqual(r.oRecordData[class_to_insert._py_to_orient_field_mapping['datetime_field']], 
+                         class_to_insert.datetime_field.timestamp)
         
     def test_load_record(self):
         
@@ -92,6 +98,7 @@ class TestModels(OgormTest):
         class_to_insert = ClassToLoad()
         class_to_insert.int_field = 10
         class_to_insert.str_field = 'foobar'
+        class_to_insert.datetime_field = Arrow.utcnow()
         insert(class_to_insert, client=self.client)
         self.assertIsNotNone(class_to_insert.rid)
         r = load(class_to_insert.rid, client=self.client)
@@ -100,3 +107,5 @@ class TestModels(OgormTest):
                          class_to_insert.str_field)
         self.assertEqual(r.oRecordData[class_to_insert._py_to_orient_field_mapping['int_field']], 
                          class_to_insert.int_field)
+        self.assertEqual(r.oRecordData[class_to_insert._py_to_orient_field_mapping['datetime_field']], 
+                         class_to_insert.datetime_field.timestamp)

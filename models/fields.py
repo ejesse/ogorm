@@ -1,4 +1,5 @@
-import datetime
+from arrow.arrow import Arrow
+
 from models.exceptions import ValidationError
 
 
@@ -33,6 +34,15 @@ class Field:
         self._set_python_type()
         self._set_orientdb_type()
         self._set_orientdb_type_id()
+        
+    def orient_value(self):
+        return self.value
+    
+    def to_json(self):
+        return repr(self)
+    
+    def orient_to_python(self, value):
+        self.value = value
             
     def _set_python_type(self):
         self.python_type = None
@@ -120,13 +130,34 @@ class StringField(Field):
 class DateTimeField(Field):
     
     def _set_python_type(self):
-        self.python_type = datetime.datetime
+        self.python_type = Arrow
 
     def _set_orientdb_type(self):
-        self.orientdb_type = 'datetime'
+        self.orientdb_type = 'long'
         
     def _set_orientdb_type_id(self):
-        self.orientdb_type_id = 6
+        self.orientdb_type_id = 4
+        
+    def to_json(self):
+        if self.value is not None:
+            return str(self.value)
+        return None
+    
+    def orient_value(self):
+        # trying to use timezones with the driver
+        # and orient is a nightmare
+        # let's just ensure we go to UTC
+        # before we save and then do it naive
+        if self.value is not None:
+            # first make sure it's UTC
+            ovalue = self.value.to('utc')
+            return ovalue.timestamp
+        
+    def orient_to_python(self, value):
+        # we get back a float from orient
+        # convert it to a utc Arrow time object
+        pvalue = Arrow.get(value)
+        value = pvalue.to('utc')
 
 
 class BinaryField(Field):

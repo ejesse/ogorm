@@ -149,8 +149,9 @@ class Model(metaclass=ModelBase):
         # orient driver returns an instance of
         # pyorient.types.OrientRecord
         # which in turn stores its data in
-        # property oRecordData
-        # and other attributes in private variables
+        # property oRecordData dictionary
+        # and other attributes (like rid)
+        # in private variables
         orient_class = orient_record._OrientRecord__o_class
         object_to_return = get_class_from_orient_class_name(orient_class)()
         object_to_return.rid = orient_record._rid
