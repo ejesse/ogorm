@@ -2,7 +2,7 @@ import json
 import logging
 
 from connection.connection import get_connection
-from models.models import get_orient_valid_class_name
+from models.model_utils import get_orient_valid_class_name
 from utils import get_logger_for_name
 
 

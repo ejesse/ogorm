@@ -2,13 +2,25 @@ import logging
 
 from arrow.arrow import Arrow
 
-from models.fields import StringField
-from models.models import Model, get_full_class_path_name, \
+import models
+from models.fields import StringField, IntegerField, DateTimeField, FloatField, \
+    BinaryField
+from models.model_utils import get_full_class_path_name, \
     get_orient_valid_class_name, get_module_class_name_from_orient_class_name, \
     class_for_name, get_class_from_orient_class_name
+from models.models import Model
 from models.orient_sql import load, create_class, insert
 from tests import OgormTest
 from tests.orient_sql_tests import ClassToInsert
+
+
+class ClassToGet(models.models.Model):
+            
+    str_field = StringField()
+    int_field = IntegerField()
+    datetime_field = DateTimeField()
+    float_field = FloatField()
+    bin_field = BinaryField()
 
 
 class TestModels(OgormTest):
@@ -133,3 +145,23 @@ class TestModels(OgormTest):
         self.assertEqual(result.datetime_field, class_to_insert.datetime_field)
         self.assertEqual(result.float_field, class_to_insert.float_field)
         self.assertEqual(result.bin_field, class_to_insert.bin_field)
+        
+    def test_get(self):
+        
+        create_class(ClassToGet, client=self.client)
+        
+        class_to_insert = ClassToGet()
+        class_to_insert.int_field = 10
+        class_to_insert.str_field = 'foobar'
+        class_to_insert.datetime_field = Arrow.utcnow()
+        class_to_insert.float_field = 12345.547
+        class_to_insert.bin_field = bytes('foo','utf-8')
+        insert(class_to_insert, client=self.client)
+        loaded_class = ClassToGet.get(class_to_insert.rid, client=self.client)
+        self.assertEqual(class_to_insert.__class__, loaded_class.__class__)
+        self.assertEqual(loaded_class.rid, class_to_insert.rid)
+        self.assertEqual(loaded_class.str_field, class_to_insert.str_field)
+        self.assertEqual(loaded_class.int_field, class_to_insert.int_field)
+        self.assertEqual(loaded_class.datetime_field, class_to_insert.datetime_field)
+        self.assertEqual(loaded_class.float_field, class_to_insert.float_field)
+        self.assertEqual(loaded_class.bin_field, class_to_insert.bin_field)
