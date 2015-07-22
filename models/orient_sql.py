@@ -49,12 +49,12 @@ def insert(obj, client=None):
     for k in obj._fields.keys():
         values[obj._py_to_orient_field_mapping[k]] = obj._fields[k].orient_value()
 
-             
     insert_str = "%s CONTENT %s" % (insert_str, json.dumps(values))
     resp = client.command(insert_str)
     rec = resp[0]
     obj.rid = rec._rid
     return rec
+
 
 def load(rid, client=None):
     
@@ -62,4 +62,24 @@ def load(rid, client=None):
         client = get_connection()
         
     return client.record_load(rid)
+
+
+def update(obj, client=None):
+    
+    if client is None:
+        client = get_connection()
+        
+    class_name = get_orient_valid_class_name(obj)
+    
+    update_str = "UPDATE %s " % class_name
+    
+    values = {}
+    
+    for k in obj._fields.keys():
+        values[obj._py_to_orient_field_mapping[k]] = obj._fields[k].orient_value()
+
+    update_str = "%s CONTENT %s" % (update_str, json.dumps(values))
+    resp = client.command(update_str)
+    rec = resp[0]
+    return rec
     

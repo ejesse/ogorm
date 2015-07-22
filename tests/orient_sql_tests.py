@@ -6,7 +6,7 @@ from models import models
 from models.fields import IntegerField, FloatField, StringField, \
     DateTimeField, BinaryField, to_java_case
 from models.model_utils import get_orient_valid_class_name
-from models.orient_sql import create_class, insert, load
+from models.orient_sql import create_class, insert, load, update
 from tests import OgormTest
 
 
@@ -29,6 +29,15 @@ class ClassToInsert(models.Model):
 
 
 class ClassToLoad(models.Model):
+            
+    str_field = StringField()
+    int_field = IntegerField()
+    datetime_field = DateTimeField()
+    float_field = FloatField()
+    bin_field = BinaryField()
+    
+
+class ClassToUpdate(models.Model):
             
     str_field = StringField()
     int_field = IntegerField()
@@ -127,3 +136,43 @@ class TestModels(OgormTest):
                          class_to_insert.float_field)
         self.assertEqual(base64.b64decode(r.oRecordData[class_to_insert._py_to_orient_field_mapping['bin_field']].encode()), 
                          class_to_insert.bin_field)
+        
+    def test_record_update(self):
+        
+        create_class(ClassToUpdate, client=self.client)
+        
+        class_to_update = ClassToUpdate()
+        class_to_update.int_field = 10
+        class_to_update.str_field = 'foobar'
+        class_to_update.datetime_field = Arrow.utcnow()
+        class_to_update.float_field = 12345.547
+        insert(class_to_update, client=self.client)
+        self.assertIsNotNone(class_to_update.rid)
+        r = load(class_to_update.rid, client=self.client)
+        self.assertEqual(r._rid, class_to_update.rid)
+        self.assertEqual(r.oRecordData[class_to_update._py_to_orient_field_mapping['str_field']], 
+                         class_to_update.str_field)
+        self.assertEqual(r.oRecordData[class_to_update._py_to_orient_field_mapping['int_field']], 
+                         class_to_update.int_field)
+        self.assertEqual(r.oRecordData[class_to_update._py_to_orient_field_mapping['datetime_field']], 
+                         class_to_update.datetime_field.timestamp)
+        self.assertEqual(r.oRecordData[class_to_update._py_to_orient_field_mapping['float_field']], 
+                         class_to_update.float_field)
+        class_to_update.int_field = 20
+        class_to_update.str_field = 'barfoo'
+        class_to_update.datetime_field = Arrow.utcnow()
+        class_to_update.float_field = None
+        update(class_to_update, client=self.client)
+        self.assertIsNotNone(class_to_update.rid)
+        r = load(class_to_update.rid, client=self.client)
+        self.assertEqual(r._rid, class_to_update.rid)
+        self.assertEqual(r.oRecordData[class_to_update._py_to_orient_field_mapping['str_field']], 
+                         class_to_update.str_field)
+        self.assertEqual(r.oRecordData[class_to_update._py_to_orient_field_mapping['int_field']], 
+                         class_to_update.int_field)
+        self.assertEqual(r.oRecordData[class_to_update._py_to_orient_field_mapping['datetime_field']], 
+                         class_to_update.datetime_field.timestamp)
+        self.assertFalse(class_to_update._py_to_orient_field_mapping['float_field'] in r.oRecordData)
+        
+        
+        
