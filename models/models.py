@@ -2,7 +2,7 @@ import importlib
 
 from models.fields import Field, to_java_case
 from models.model_utils import get_class_from_orient_class_name
-from models.orient_sql import load
+from models.orient_sql import load, insert, update
 
 
 class ModelBase(type):
@@ -131,3 +131,9 @@ class Model(metaclass=ModelBase):
         for k in orient_record.oRecordData.keys():
             object_to_return._fields[object_to_return._py_to_orient_field_mapping[k]].orient_to_python(orient_record.oRecordData[k])
         return object_to_return
+    
+    def save(self, client=None):
+        if self.rid is None:
+            insert(self, client=client)
+        else:
+            update(self, client=client)

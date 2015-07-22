@@ -21,6 +21,13 @@ class ClassToGet(models.models.Model):
     datetime_field = DateTimeField()
     float_field = FloatField()
     bin_field = BinaryField()
+    
+class ClassToSave(models.models.Model):
+            
+    str_field = StringField()
+    int_field = IntegerField()
+    datetime_field = DateTimeField()
+    float_field = FloatField()
 
 
 class TestModels(OgormTest):
@@ -165,3 +172,34 @@ class TestModels(OgormTest):
         self.assertEqual(loaded_class.datetime_field, class_to_insert.datetime_field)
         self.assertEqual(loaded_class.float_field, class_to_insert.float_field)
         self.assertEqual(loaded_class.bin_field, class_to_insert.bin_field)
+        
+    def test_save(self):
+        
+        create_class(ClassToSave, client=self.client)
+        
+        class_to_save = ClassToSave()
+        class_to_save.int_field = 10
+        class_to_save.str_field = 'foobar'
+        class_to_save.datetime_field = Arrow.utcnow()
+        class_to_save.float_field = 12345.547
+        class_to_save.save(client=self.client)
+        loaded_class = ClassToSave.get(class_to_save.rid, client=self.client)
+        self.assertEqual(class_to_save.__class__, loaded_class.__class__)
+        self.assertEqual(loaded_class.rid, class_to_save.rid)
+        self.assertEqual(loaded_class.str_field, class_to_save.str_field)
+        self.assertEqual(loaded_class.int_field, class_to_save.int_field)
+        self.assertEqual(loaded_class.datetime_field, class_to_save.datetime_field)
+        self.assertEqual(loaded_class.float_field, class_to_save.float_field)
+        class_to_save.int_field = 20
+        class_to_save.str_field = 'foobarioioioioio'
+        class_to_save.datetime_field = Arrow.utcnow()
+        class_to_save.float_field = None
+        class_to_save.save(client=self.client)
+        loaded_class = ClassToSave.get(class_to_save.rid, client=self.client)
+        self.assertEqual(class_to_save.__class__, loaded_class.__class__)
+        self.assertEqual(loaded_class.rid, class_to_save.rid)
+        self.assertEqual(loaded_class.str_field, class_to_save.str_field)
+        self.assertEqual(loaded_class.int_field, class_to_save.int_field)
+        self.assertEqual(loaded_class.datetime_field, class_to_save.datetime_field)
+        self.assertEqual(loaded_class.float_field, class_to_save.float_field)
+        
