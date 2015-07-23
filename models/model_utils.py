@@ -1,5 +1,15 @@
 import importlib
 
+from models.base import Model
+
+
+def get_extension(klass):
+    if not hasattr(klass,'__call__'):
+        klass = klass.__class__
+    if klass.__base__ is Model:
+        return None
+    
+    
 
 def get_full_class_path_name(obj):
     if hasattr(obj,'__call__'):

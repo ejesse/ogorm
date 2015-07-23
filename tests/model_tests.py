@@ -8,7 +8,7 @@ from models.fields import StringField, IntegerField, DateTimeField, FloatField, 
 from models.model_utils import get_full_class_path_name, \
     get_orient_valid_class_name, get_module_class_name_from_orient_class_name, \
     class_for_name, get_class_from_orient_class_name
-from models.models import Model
+from models.base import Model
 from models.orient_sql import load, create_class, insert
 from tests import OgormTest
 from tests.orient_sql_tests import ClassToInsert
