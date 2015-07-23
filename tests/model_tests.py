@@ -14,7 +14,7 @@ from tests import OgormTest
 from tests.orient_sql_tests import ClassToInsert
 
 
-class ClassToGet(models.models.Model):
+class ClassToGet(Model):
             
     str_field = StringField()
     int_field = IntegerField()
@@ -22,7 +22,7 @@ class ClassToGet(models.models.Model):
     float_field = FloatField()
     bin_field = BinaryField()
     
-class ClassToSave(models.models.Model):
+class ClassToSave(Model):
             
     str_field = StringField()
     int_field = IntegerField()

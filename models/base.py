@@ -1,5 +1,3 @@
-import importlib
-
 from models.fields import Field, to_java_case
 from models.model_utils import get_class_from_orient_class_name
 from models.orient_sql import load, insert, update

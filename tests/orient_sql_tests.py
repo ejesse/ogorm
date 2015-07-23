@@ -5,7 +5,7 @@ from arrow.arrow import Arrow
 from models.base import Model
 from models.fields import IntegerField, FloatField, StringField, \
     DateTimeField, BinaryField, to_java_case
-from Model_utils import get_orient_valid_class_name
+from models.model_utils import get_orient_valid_class_name
 from models.orient_sql import create_class, insert, load, update
 from tests import OgormTest
 
