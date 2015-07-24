@@ -97,4 +97,8 @@ def update(obj, client=None):
 
 
 def delete(rid, client=None):
-    pass
+    
+    if client is None:
+        client = get_connection()
+    
+    return client.record_delete(rid)

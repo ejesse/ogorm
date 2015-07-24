@@ -7,7 +7,7 @@ from models.base import Model
 from models.fields import IntegerField, FloatField, StringField, \
     DateTimeField, BinaryField, to_java_case
 from models.model_utils import get_orient_valid_class_name
-from models.orient_sql import create_class, insert, load, update
+from models.orient_sql import create_class, insert, load, update, delete
 from tests import OgormTest
 from utils import get_logger_for_name
 
@@ -58,6 +58,10 @@ class ClassToUpdate(Model):
 class Foo(Model):
     pass
 
+
+class ClassToDelete(Model):
+
+    str_field = StringField()
 
 class TestModels(OgormTest):
 
@@ -210,4 +214,12 @@ class TestModels(OgormTest):
                          class_to_update.datetime_field.timestamp)
         self.assertFalse(class_to_update._py_to_orient_field_mapping['float_field'] in r.oRecordData)
 
-
+    def test_delete_record(self):
+        
+        create_class(ClassToDelete, client=self.client)
+        ctd = ClassToDelete()
+        ctd.str_field = 'jfksfjdsl'
+        ctd.save(client=self.client)
+        self.assertTrue(delete(ctd.rid, client=self.client))
+        self.assertIsNone(ClassToDelete.get(ctd.rid, client=self.client))
+        

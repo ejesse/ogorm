@@ -86,7 +86,10 @@ class Model(metaclass=ModelBase):
     
     @classmethod
     def get(cls, rid, client=None):
-        return Model.from_orient(load(rid, client=client))
+        resp = load(rid, client=client)
+        if resp.oRecordData == {}:
+            return None
+        return Model.from_orient(resp)
     
     def _set_rid(self, rid):
         # temporarily remove the '#' if it is there
