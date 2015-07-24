@@ -22,13 +22,14 @@ def get_module_class_name_from_orient_class_name(orient_class):
 
 def class_for_name(module_name, class_name):
     # load the module, will raise ImportError if module cannot be loaded
-    m = importlib.import_module(module_name)
+    module = importlib.import_module(module_name)
     # get the class, will raise AttributeError if class cannot be found
-    c = getattr(m, class_name)
-    return c
+    klass = getattr(module, class_name)
+    return klass
 
 
 def get_class_from_orient_class_name(orient_class):
     # wraps up other functions into one
-    module_name, class_name = get_module_class_name_from_orient_class_name(orient_class)
+    module_name, class_name = get_module_class_name_from_orient_class_name(
+                                                                   orient_class)
     return class_for_name(module_name, class_name)
