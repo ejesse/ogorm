@@ -1,4 +1,5 @@
 import base64
+import logging
 
 from arrow.arrow import Arrow
 
@@ -8,6 +9,10 @@ from models.fields import IntegerField, FloatField, StringField, \
 from models.model_utils import get_orient_valid_class_name
 from models.orient_sql import create_class, insert, load, update
 from tests import OgormTest
+from utils import get_logger_for_name
+
+
+LOGGER = logging.getLogger(get_logger_for_name(__name__))
 
 
 class ClassWithAttributes(Model):
@@ -18,6 +23,10 @@ class ClassWithAttributes(Model):
     datetime_field = DateTimeField()
     bin_field = BinaryField()
 
+
+class InheritingClass(ClassWithAttributes):
+    
+    another_str_field = StringField()
 
 class ClassToInsert(Model):
 
@@ -95,6 +104,24 @@ class TestModels(OgormTest):
         for f in cwa._fields.keys():
             self.assertTrue(any(x.type == cwa._fields[f].orientdb_type_id for x in r))
             self.assertTrue(any(x.name == to_java_case(f) for x in r))
+            
+    def test_create_inheriting_class(self):
+        
+        create_class(ClassWithAttributes, client=self.client)
+        create_class(InheritingClass, client=self.client)
+
+        # we will get the properties and make sure they are
+        # correct types and names
+        r = self.client.command("select expand(properties) from ( select expand(classes) from metadata:schema) where name = '%s'" % get_orient_valid_class_name(InheritingClass))
+        ic = InheritingClass()
+        # loop through the fields and make sure they are defined
+        # the way we expect in OrientDB
+        # orient will NOT show inherited fields
+        for f in ic._fields.keys():
+            if not ic._fields[f].inherited:
+                self.assertTrue(any(x.type == ic._fields[f].orientdb_type_id for x in r))
+                self.assertTrue(any(x.name == to_java_case(f) for x in r))
+
 
     def test_insert(self):
 

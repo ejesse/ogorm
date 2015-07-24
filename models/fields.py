@@ -37,6 +37,7 @@ class Field:
         self._set_python_type()
         self._set_orientdb_type()
         self._set_orientdb_type_id()
+        self.inherited = False
         
     def clean_value(self, value):
         return value
