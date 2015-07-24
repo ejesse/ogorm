@@ -3,12 +3,12 @@ import logging
 from arrow.arrow import Arrow
 
 import models
+from models.base import Model
 from models.fields import StringField, IntegerField, DateTimeField, FloatField, \
-    BinaryField
+    BinaryField, BooleanField
 from models.model_utils import get_full_class_path_name, \
     get_orient_valid_class_name, get_module_class_name_from_orient_class_name, \
     class_for_name, get_class_from_orient_class_name
-from models.base import Model
 from models.orient_sql import load, create_class, insert
 from tests import OgormTest
 from tests.orient_sql_tests import ClassToInsert
@@ -21,6 +21,7 @@ class ClassToGet(Model):
     datetime_field = DateTimeField()
     float_field = FloatField()
     bin_field = BinaryField()
+    bool_field = BooleanField()
     
 class ClassToSave(Model):
             
@@ -28,6 +29,7 @@ class ClassToSave(Model):
     int_field = IntegerField()
     datetime_field = DateTimeField()
     float_field = FloatField()
+    bool_field = BooleanField()
 
 
 class TestModels(OgormTest):
@@ -163,6 +165,7 @@ class TestModels(OgormTest):
         class_to_insert.datetime_field = Arrow.utcnow()
         class_to_insert.float_field = 12345.547
         class_to_insert.bin_field = bytes('foo','utf-8')
+        class_to_insert.bool_field = True
         insert(class_to_insert, client=self.client)
         loaded_class = ClassToGet.get(class_to_insert.rid, client=self.client)
         self.assertEqual(class_to_insert.__class__, loaded_class.__class__)
@@ -172,6 +175,7 @@ class TestModels(OgormTest):
         self.assertEqual(loaded_class.datetime_field, class_to_insert.datetime_field)
         self.assertEqual(loaded_class.float_field, class_to_insert.float_field)
         self.assertEqual(loaded_class.bin_field, class_to_insert.bin_field)
+        self.assertEqual(loaded_class.bool_field, class_to_insert.bool_field)
         
     def test_save(self):
         
@@ -190,10 +194,12 @@ class TestModels(OgormTest):
         self.assertEqual(loaded_class.int_field, class_to_save.int_field)
         self.assertEqual(loaded_class.datetime_field, class_to_save.datetime_field)
         self.assertEqual(loaded_class.float_field, class_to_save.float_field)
+        self.assertEqual(loaded_class.bool_field, class_to_save.bool_field)
         class_to_save.int_field = 20
         class_to_save.str_field = 'foobarioioioioio'
         class_to_save.datetime_field = Arrow.utcnow()
         class_to_save.float_field = None
+        class_to_save.bool_field = False
         class_to_save.save(client=self.client)
         loaded_class = ClassToSave.get(class_to_save.rid, client=self.client)
         self.assertEqual(class_to_save.__class__, loaded_class.__class__)
@@ -202,4 +208,5 @@ class TestModels(OgormTest):
         self.assertEqual(loaded_class.int_field, class_to_save.int_field)
         self.assertEqual(loaded_class.datetime_field, class_to_save.datetime_field)
         self.assertEqual(loaded_class.float_field, class_to_save.float_field)
+        self.assertEqual(loaded_class.bool_field, class_to_save.bool_field)
         

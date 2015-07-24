@@ -122,6 +122,18 @@ class FloatField(Field):
         self.orientdb_type_id = 4
 
 
+class BooleanField(Field):
+    
+    def _set_python_type(self):
+        self.python_type = bool
+
+    def _set_orientdb_type(self):
+        self.orientdb_type = 'boolean'
+        
+    def _set_orientdb_type_id(self):
+        self.orientdb_type_id = 0
+
+
 class StringField(Field):
     
     def _set_python_type(self):

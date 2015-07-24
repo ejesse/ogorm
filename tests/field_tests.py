@@ -4,7 +4,7 @@ from arrow.arrow import Arrow
 
 from models.exceptions import ValidationError
 from models.fields import Field, IntegerField, FloatField, StringField, \
-    DateTimeField, BinaryField, to_java_case
+    DateTimeField, BinaryField, to_java_case, BooleanField
 from tests import OgormTest
 
 
@@ -89,4 +89,16 @@ class TestBinaryField(OgormTest):
         field.value = 'f'
         self.assertRaises(ValidationError, field._type_validation)
         field.value = bytes(range(20))
+        field._type_validation()
+
+class TestBooleanField(OgormTest):
+    
+    def test_type_validation(self):
+        
+        field = BooleanField()
+        field.value = 'f'
+        self.assertRaises(ValidationError, field._type_validation)
+        field.value = True
+        field._type_validation()
+        field.value = False
         field._type_validation()
