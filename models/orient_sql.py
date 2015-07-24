@@ -94,4 +94,7 @@ def update(obj, client=None):
     resp = client.command(update_str)
     rec = resp[0]
     return rec
-    
+
+
+def delete(rid, client=None):
+    pass

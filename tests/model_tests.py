@@ -3,7 +3,7 @@ import logging
 from arrow.arrow import Arrow
 
 import models
-from models.base import Model
+from models.base import Model, set_parent_fields
 from models.fields import StringField, IntegerField, DateTimeField, FloatField, \
     BinaryField, BooleanField
 from models.model_utils import get_full_class_path_name, \
@@ -73,6 +73,43 @@ class TestModels(OgormTest):
         
         self.assertTrue(isinstance(TestModel2(), TestModel1))
         self.assertTrue(isinstance(TestModel2(), Model))
+
+                
+    def test_set_parent_fields(self):
+        
+        class TestModel1:
+            str_field = StringField()
+            _field_defs = {'str_field': StringField()}
+        
+        class TestModel2(TestModel1):
+            another_str_field = StringField()
+            
+        class TestModel3(TestModel2):
+            yasf = StringField()
+
+        for base in TestModel3.__bases__:
+            set_parent_fields(TestModel3, base)
+
+        self.assertTrue('str_field' in TestModel3._field_defs)
+        self.assertTrue('another_str_field' in TestModel3._field_defs)
+                
+        
+    def test_inherited_instantiation(self):
+
+        class TestModel1(Model):
+            str_field = StringField()
+        
+        class TestModel2(TestModel1):
+            another_str_field = StringField()
+            
+        tm1 = TestModel1()
+        self.assertTrue('str_field' in tm1._fields.keys())
+        self.assertFalse('another_str_field' in tm1._fields.keys())
+        
+        tm2 = TestModel2()
+        self.assertTrue('str_field' in tm2._fields.keys())
+        self.assertTrue('another_str_field' in tm2._fields.keys())
+        self.assertTrue(tm2._fields['str_field'].inherited)
         
     def test_field_accessor(self):
         

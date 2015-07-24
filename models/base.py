@@ -3,14 +3,13 @@ from models.model_utils import get_class_from_orient_class_name
 from models.orient_sql import load, insert, update
 
 
-def set_parent_fields(new_class, base):
-    
-        if base is not Model:
-            for obj_name, obj in base.__dict__.items():
+def set_parent_fields(new_class, class_base):
+        if class_base is not Model:
+            for obj_name, obj in class_base.__dict__.items():
                 if isinstance(obj, Field):
                     new_class._field_defs[obj_name]= obj
                     setattr(new_class, obj_name, obj)
-            for parent_base in base.__bases__:
+            for parent_base in class_base.__bases__:
                 set_parent_fields(new_class, parent_base)
 
 class ModelBase(type):
@@ -23,21 +22,10 @@ class ModelBase(type):
         parents = [b for b in bases if isinstance(b, ModelBase)]
         if not parents:
             return super_new(cls, name, bases, attrs)
-
+        
         # Create the class.
         module = attrs.pop('__module__')
         new_class = super_new(cls, name, bases, {'__module__': module})
-        attr_meta = attrs.pop('Meta', None)
-        abstract = getattr(attr_meta, 'abstract', False)
-        
-        if abstract:
-            # Abstract base models can't be instantiated and don't appear in
-            # the list of models for an app. We do the final setup for them a
-            # little differently from normal models.
-            attr_meta.abstract = False
-            new_class.Meta = attr_meta
-            return new_class
-        
         # setup field container
         setattr(new_class, '_field_defs', {})
         
@@ -46,11 +34,9 @@ class ModelBase(type):
             if isinstance(obj, Field):
                 new_class._field_defs[obj_name]= obj
             setattr(new_class, obj_name, obj)
-            
         # Add parent fields
-        for base in new_class.__class__.__bases__:
-            set_parent_fields(new_class, base)
-            
+        for class_base in new_class.__bases__:
+            set_parent_fields(new_class, class_base)
         return new_class
     
 
@@ -72,9 +58,9 @@ class Model(metaclass=ModelBase):
             self._fields[k] = self._field_defs[k].__class__.__call__()
             super(Model, self).__setattr__(k, self._fields[k])
             # set inherited fields
-            for base in self.__class__.__bases__:
-                if base is not Model:
-                    if self._fields[k] in base._field_defs:
+            for class_base in self.__class__.__bases__:
+                if class_base is not Model:
+                    if k in class_base._field_defs.keys():
                         self._fields[k].inherited = True
             # setup the field mapping
             self._py_to_orient_field_mapping[k] = to_java_case(k)
