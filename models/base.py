@@ -1,6 +1,7 @@
+from models.exceptions import OgormError
 from models.fields import Field, to_java_case
 from models.model_utils import get_class_from_orient_class_name
-from models.orient_sql import load, insert, update
+from models.orient_sql import load, insert, update, delete
 
 
 def set_parent_fields(new_class, class_base):
@@ -144,3 +145,8 @@ class Model(metaclass=ModelBase):
             insert(self, client=client)
         else:
             update(self, client=client)
+
+    def delete(self, client=None):
+        if self.rid is None:
+            raise OgormError("Can't delete an instance without an RID")
+        return delete(self.rid, client=client)

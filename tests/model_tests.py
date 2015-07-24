@@ -4,6 +4,7 @@ from arrow.arrow import Arrow
 
 import models
 from models.base import Model, set_parent_fields
+from models.exceptions import OgormError
 from models.fields import StringField, IntegerField, DateTimeField, FloatField, \
     BinaryField, BooleanField
 from models.model_utils import get_full_class_path_name, \
@@ -11,7 +12,7 @@ from models.model_utils import get_full_class_path_name, \
     class_for_name, get_class_from_orient_class_name
 from models.orient_sql import load, create_class, insert
 from tests import OgormTest
-from tests.orient_sql_tests import ClassToInsert
+from tests.orient_sql_tests import ClassToInsert, ClassToDelete
 
 
 class ClassToGet(Model):
@@ -247,3 +248,12 @@ class TestModels(OgormTest):
         self.assertEqual(loaded_class.float_field, class_to_save.float_field)
         self.assertEqual(loaded_class.bool_field, class_to_save.bool_field)
         
+    def test_delete(self):
+        
+        create_class(ClassToDelete, client=self.client)
+        class_to_delete = ClassToDelete()
+        class_to_delete.str_field = 'fdjsfdsf'
+        self.assertRaises(OgormError, class_to_delete.delete)
+        class_to_delete.save(client=self.client)
+        self.assertTrue(class_to_delete.delete(client=self.client))
+        self.assertIsNone(ClassToDelete.get(class_to_delete.rid, client=self.client))
