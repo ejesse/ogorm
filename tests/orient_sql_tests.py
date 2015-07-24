@@ -74,6 +74,14 @@ class TestModels(OgormTest):
         # or properties to check, we just need to know its there
         self.assertTrue(any(x.name == get_orient_valid_class_name(Foo) for x in r))
 
+    def test_only_create_instances_of_model(self):
+
+        class NotAModel:
+            pass
+        
+        self.assertRaises(ValueError, create_class, NotAModel)
+
+    
     def test_create_class_with_attribues(self):
 
         create_class(ClassWithAttributes, client=self.client)

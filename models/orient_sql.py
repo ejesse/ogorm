@@ -10,6 +10,9 @@ LOGGER = logging.getLogger(get_logger_for_name(__name__))
 
 
 def create_class(klass, extends=None, client=None):
+    from models.orient_sql_utils import is_model
+    if not is_model(klass):
+        raise ValueError("Only OrientDB models can be used to create Orient classes")
     
     if client is None:
         client = get_connection()
